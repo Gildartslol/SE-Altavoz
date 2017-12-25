@@ -1,11 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-int main (int argc,char **argv)
-{
-  beep();
-   return 0;
-}
 
 //Play sound using built in speaker
  static void play_sound(uint32_t nFrequence) {
@@ -39,4 +34,11 @@ int main (int argc,char **argv)
  	 nosound();
           //set_PIT_2(old_frequency);
  }
+
+
+int main (int argc,char **argv)
+{
+  beep();
+   return 0;
+}
 
