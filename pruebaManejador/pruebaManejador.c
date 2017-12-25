@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/io.h>
+#include <time.h>
 
 
 //Play sound using built in speaker
