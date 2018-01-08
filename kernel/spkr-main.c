@@ -72,7 +72,7 @@ static struct file_operations fileop = {
 	.unlocked_ioctl = ioctl_function
 };
 
-static int __init init_module(void)
+static int __init setUp(void)
 {
 	printk(KERN_INFO "Entering module\n");
 
@@ -93,7 +93,7 @@ static int __init init_module(void)
 	return 0;
 }
 
-static void __exit exit_module(void)
+static void __exit setDown(void)
 {
 	printk(KERN_INFO "Exiting Module \n");
 
@@ -105,5 +105,5 @@ static void __exit exit_module(void)
 
 }
 
-module_init(init_module);
-module_exit(exit_module);
+module_init(setUp);
+module_exit(setDown);
