@@ -4,9 +4,12 @@
 //#include <asm/io.h>
 //#include <sys/io.h>
 #include <linux/io.h>
+#include <linux/i8253.h>
+
 
 //#include "version.h"
 #include "spkr-io.h"
+
 
 #define SPKR_REGISTRO_CONTROL 0x43
 #define SPKR_REGISTRO_DATOS 0x42
