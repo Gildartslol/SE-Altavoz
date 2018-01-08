@@ -46,6 +46,32 @@ static struct file_operations fileop = {
 	.unlocked_ioctl = ioctl_function
 };
 
+
+static int abrir(struct inode *inode, struct file *filep){
+
+}
+
+static int cerrar(struct inode *inode, struct file *filep){
+
+
+}
+
+static long ioctl_function(struct file *filep, unsigned int cmd, unsigned long arg){
+
+
+}
+
+static spkr_fsync(struct file *filep,int dSyc){
+
+}
+
+static ssize_t escribir(struct file *filep, const char __user *buf, size_t count , loff_t *f_pos){
+
+
+}
+
+
+
 static int __init init_module(void)
 {
 	printk(KERN_INFO "Entering module\n");
