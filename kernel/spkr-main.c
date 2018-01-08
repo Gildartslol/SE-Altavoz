@@ -54,8 +54,8 @@ static long ioctl_function(struct file *filep, unsigned int cmd, unsigned long a
 	return 0;
 }
 
-static spkr_fsync(struct file *filep,int dSyc){
-
+static int spkr_fsync(struct file *filep,int dSyc){
+	return 0;
 }
 
 static ssize_t escribir(struct file *filep, const char __user *buf, size_t count , loff_t *f_pos){
