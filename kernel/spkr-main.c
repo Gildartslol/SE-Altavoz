@@ -31,6 +31,9 @@ struct dispositivo
 
 	//sync
 
+	rwlock_t lock_escritura;
+	unsigned long flagsEscritura;
+
 } disp;
 
 static unsigned int minor = 0;
@@ -41,26 +44,51 @@ module_param(minor,int, S_IRUGO);
 
 
 
-static int abrir(struct inode *inode, struct file *filep){
-	printk(KERN_INFO "Open module\n");
+static int abrir(struct inode *inode, struct file *descriptor){
+
+	if((descriptor->f_mode & O_ACCMODE) == FMODE_READ){
+
+		printk(KERN_INFO "Open module\n");
+
+	}else{
+			if(((descriptor->f_mode & O_ACCMODE) == FMODE_WRITE && (write_trylock(&(disp.lock_escritura))==0)){
+				return -EBUSY;
+			}
+		printk(KERN_INFO "Open module\n");
+	}
+
+	
 	return 0;
 }
 
-static int cerrar(struct inode *inode, struct file *filep){
+static int cerrar(struct inode *inode, struct file *descriptor){
+
+	if((descriptor->f_mode & O_ACCMODE) == FMODE_READ){
+
+		printk(KERN_INFO "Close module\n");
+
+	}else{
+			if((descriptor->f_mode & O_ACCMODE) == FMODE_WRITE)
+				write_unlock_irqrestore(&(disp.lock_escritura),disp.flagsEscritura);
+			
+	}
+
+
+
 	printk(KERN_INFO "Close Module \n");
 	return 0;
 }
 
-static long ioctl_function(struct file *filep, unsigned int cmd, unsigned long arg){
+static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned long arg){
 
 	return 0;
 }
 
-static int spkr_fsync(struct file *filep, loff_t start, loff_t end, int datasync){
+static int spkr_fsync(struct file *descriptor, loff_t start, loff_t end, int datasync){
 	return 0;
 }
 
-static ssize_t escribir(struct file *filep, const char __user *buf, size_t count , loff_t *f_pos){
+static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t count , loff_t *f_pos){
 	printk(KERN_INFO "Write Module \n");
 
 }
@@ -85,6 +113,13 @@ static int __init setUp(void)
 	cdev_add(&(disp.dev),disp.devTDispositivo,1);
 	disp.class = class_create(THIS_MODULE,"speaker");
 	disp.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
+
+
+
+	//sync
+	rwlock_init(&(disp.lock_escritura));
+
+
 
 
 	int mj, mn;
