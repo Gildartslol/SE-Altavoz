@@ -38,13 +38,13 @@ static unsigned int tamanio_buffer = PAGE_SIZE;
 unsigned int buffer_limite = -1;
 
 static struct file_operations fileop = {
-	.owner = THIS_MODULE;
-	.open = abrir;
-	.release = cerrar;
-	.write = escribir;
-	.fsync = spkr_fsync;
+	.owner = THIS_MODULE,
+	.open = abrir,
+	.release = cerrar,
+	.write = escribir,
+	.fsync = spkr_fsync,
 	.unlocked_ioctl = ioctl_function
-}
+};
 
 static int __init init_module(void)
 {
@@ -63,7 +63,7 @@ static int __init init_module(void)
 	mj=MAJOR(disp.devTDispositivo);
 	mn=MINOR(disp.devTDispositivo);
 	printk(KERN_INFO "-minor %d   -major %d \n",mn,mj);
-	
+
 	return 0;
 }
 
@@ -74,7 +74,7 @@ static void __exit exit_module(void)
 	device_destroy(disp.class,disp.devTDispositivo);
 	class_destroy(disp.class);
 	cdev_del(&(disp.dev));
-	unregister_chrdev_region(disp.devTDispositivo,1):
+	unregister_chrdev_region(disp.devTDispositivo,1);
 
 
 }
