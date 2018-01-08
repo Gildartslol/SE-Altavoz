@@ -54,7 +54,7 @@ static long ioctl_function(struct file *filep, unsigned int cmd, unsigned long a
 	return 0;
 }
 
-static int spkr_fsync(struct file *filep,int dSyc){
+static int spkr_fsync(struct file *filep, loff_t start, loff_t end, int datasync){
 	return 0;
 }
 
