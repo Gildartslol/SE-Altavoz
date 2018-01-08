@@ -37,6 +37,7 @@ static unsigned int minor = 0;
 static unsigned int tamanio_buffer = PAGE_SIZE;
 unsigned int buffer_limite = -1;
 
+module_param(minor,int, S_IRUGO);
 
 
 
