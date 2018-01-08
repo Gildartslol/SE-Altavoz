@@ -11,20 +11,69 @@
 #include <linux/ioctl.h>
 #include <asm/uaccess.h>
 
+#include "version.h"
 #include "spkr-io.h"
 
+MODULE_AUTHOR("Jorge Amoros , Antonio Perea");
+MODULE_DESCRIPTION("PC Speaker beeper driver");
+MODULE_LICENSE("GPL");
+MODULE_ALIAS("platform:pcspkr");
 MODULE_LICENSE("Dual BSD/GPL");
 
- int __init setUp(void)
+struct dispositivo
 {
-	printk(KERN_INFO "Hello, world 2\n");
+	
+	dev_t devTDispositivo;
+	struct cdev dev;
+	struct class *class;
+	struct device *device;
+
+
+	//sync
+
+} disp;
+
+static unsigned int minor = 0;
+static unsigned int tamanio_buffer = PAGE_SIZE;
+unsigned int buffer_limite = -1;
+
+static struct file_operations fileop = {
+	.owner = THIS_MODULE;
+	.open = abrir;
+	.release = cerrar;
+	.write = escribir;
+	.fsync = spkr_fsync;
+	.unlocked_ioctl = ioctl_function
+}
+
+static int __init init_module(void)
+{
+	printk(KERN_INFO "Entering module\n");
+
+
+	alloc_chrdev_region(&(disp.devTDispositivo),minor,1,"spkr");
+	disp.dev.owner = THIS_MODULE;
+	cdev_init(&(disp.dev), &fileop);
+	cdev_add(&(disp.dev),disp.devTDispositivo,1);
+	disp.class = class_create(THIS_MODULE,"speaker");
+	info.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
+
+
+
 	return 0;
 }
 
- void __exit setDown(void)
+static void __exit exit_module(void)
 {
-	printk(KERN_INFO "Goodbye, world 2\n");
+	printk(KERN_INFO "Exiting Module \n");
+
+	device_destroy(disp.class,disp.devTDispositivo);
+	class_destroy(disp.class);
+	cdev_del(&(disp.dev));
+	unregister_chrdev_region(disp.devTDispositivo,1):
+
+
 }
 
-module_init(setUp);
-module_exit(setDown);
+module_init(init_module);
+module_exit(exit_module);
