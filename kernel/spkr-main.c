@@ -42,11 +42,12 @@ module_param(minor,int, S_IRUGO);
 
 
 static int abrir(struct inode *inode, struct file *filep){
+	printk(KERN_INFO "Open module\n");
 	return 0;
 }
 
 static int cerrar(struct inode *inode, struct file *filep){
-
+	printk(KERN_INFO "Close Module \n");
 	return 0;
 }
 
@@ -60,7 +61,7 @@ static int spkr_fsync(struct file *filep, loff_t start, loff_t end, int datasync
 }
 
 static ssize_t escribir(struct file *filep, const char __user *buf, size_t count , loff_t *f_pos){
-
+	printk(KERN_INFO "Write Module \n");
 
 }
 
