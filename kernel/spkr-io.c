@@ -5,8 +5,8 @@
 //#include <sys/io.h>
 #include <linux/io.h>
 
-#include <version.h>
-#include <spkr-io.h>
+//#include "version.h"
+#include "spkr-io.h"
 
 #define SPKR_REGISTRO_CONTROL 0x43
 #define SPKR_REGISTRO_DATOS 0x42
