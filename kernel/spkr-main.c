@@ -59,7 +59,11 @@ static int __init init_module(void)
 	info.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
 
 
-
+	int mj, mn;
+	mj=MAJOR(disp.devTDispositivo);
+	mn=MINOR(disp.devTDispositivo);
+	printk(KERN_INFO "-minor %d   -major %d \n",mn,mj);
+	
 	return 0;
 }
 
