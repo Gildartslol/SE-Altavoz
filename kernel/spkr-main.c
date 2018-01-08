@@ -11,7 +11,7 @@
 #include <linux/ioctl.h>
 #include <asm/uaccess.h>
 
-#include "version.h"
+//#include "version.h"
 #include "spkr-io.h"
 
 MODULE_AUTHOR("Jorge Amoros , Antonio Perea");
