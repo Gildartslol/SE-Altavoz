@@ -37,28 +37,21 @@ static unsigned int minor = 0;
 static unsigned int tamanio_buffer = PAGE_SIZE;
 unsigned int buffer_limite = -1;
 
-static struct file_operations fileop = {
-	.owner = THIS_MODULE,
-	.open = abrir,
-	.release = cerrar,
-	.write = escribir,
-	.fsync = spkr_fsync,
-	.unlocked_ioctl = ioctl_function
-};
+
 
 
 static int abrir(struct inode *inode, struct file *filep){
-
+	return 0;
 }
 
 static int cerrar(struct inode *inode, struct file *filep){
 
-
+	return 0;
 }
 
 static long ioctl_function(struct file *filep, unsigned int cmd, unsigned long arg){
 
-
+	return 0;
 }
 
 static spkr_fsync(struct file *filep,int dSyc){
@@ -70,7 +63,14 @@ static ssize_t escribir(struct file *filep, const char __user *buf, size_t count
 
 }
 
-
+static struct file_operations fileop = {
+	.owner = THIS_MODULE,
+	.open = abrir,
+	.release = cerrar,
+	.write = escribir,
+	.fsync = spkr_fsync,
+	.unlocked_ioctl = ioctl_function
+};
 
 static int __init init_module(void)
 {
