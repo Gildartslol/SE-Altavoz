@@ -2,7 +2,8 @@
 #include <linux/init.h>
 #include <linux/spinlock.h>
 //#include <asm/io.h>
-#include <sys/io.h>
+//#include <sys/io.h>
+#include <linux/io.h>
 
 #include <version.h>
 #include <spkr-io.h>
