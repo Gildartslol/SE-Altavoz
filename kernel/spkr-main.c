@@ -51,7 +51,7 @@ static int abrir(struct inode *inode, struct file *descriptor){
 		printk(KERN_INFO "Open module\n");
 
 	}else{
-			if(((descriptor->f_mode & O_ACCMODE) == FMODE_WRITE && (write_trylock(&(disp.lock_escritura))==0)){
+			if(((descriptor->f_mode & O_ACCMODE) == FMODE_WRITE && (write_trylock(&(disp.lock_escritura))==0))){
 				return -EBUSY;
 			}
 		printk(KERN_INFO "Open module\n");
