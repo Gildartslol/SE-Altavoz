@@ -82,7 +82,7 @@ static int __init init_module(void)
 	cdev_init(&(disp.dev), &fileop);
 	cdev_add(&(disp.dev),disp.devTDispositivo,1);
 	disp.class = class_create(THIS_MODULE,"speaker");
-	info.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
+	disp.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
 
 
 	int mj, mn;
