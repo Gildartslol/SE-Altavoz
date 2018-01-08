@@ -11,21 +11,20 @@
 #include <linux/ioctl.h>
 #include <asm/uaccess.h>
 
-#include "version.h"
 #include "spkr-io.h"
 
 MODULE_LICENSE("Dual BSD/GPL");
 
-static int __init init_module(void)
+ int __init setUp(void)
 {
 	printk(KERN_INFO "Hello, world 2\n");
 	return 0;
 }
 
-static void __exit exit_module(void)
+ void __exit setDown(void)
 {
 	printk(KERN_INFO "Goodbye, world 2\n");
 }
 
-module_init(init_module);
-module_exit(exit_module);
+module_init(setUp);
+module_exit(setDown);
