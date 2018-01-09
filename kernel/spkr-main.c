@@ -170,31 +170,7 @@ static struct file_operations fileop = {
 	.unlocked_ioctl = ioctl_function
 };
 
-static int __init setUp(void)
-{
-	printk(KERN_INFO "Entering module\n");
 
-
-	kfifo_alloc(&(disp.cola_fifo),tamanio_buffer,GFP_KERNEL);
-
-	//dispositivo
-	setUpDispositivo();
-	
-	//sync variables
-	setUpVariablesSync();
-
-
-	//temporales
-
-	setUpTemporales();
-
-	//Pruebas
-	setUpPruebas();
-
-	
-
-	return 0;
-}
 
 void setUpDispositivo(){
 
@@ -230,6 +206,35 @@ int mj, mn;
 	printk(KERN_INFO "-minor %d   -major %d \n",mn,mj);
 
 }
+
+
+static int __init setUp(void)
+{
+	printk(KERN_INFO "Entering module\n");
+
+
+	kfifo_alloc(&(disp.cola_fifo),tamanio_buffer,GFP_KERNEL);
+
+	//dispositivo
+	setUpDispositivo();
+	
+	//sync variables
+	setUpVariablesSync();
+
+
+	//temporales
+
+	setUpTemporales();
+
+	//Pruebas
+	setUpPruebas();
+
+	
+
+	return 0;
+}
+
+
 
 static void __exit setDown(void)
 {
