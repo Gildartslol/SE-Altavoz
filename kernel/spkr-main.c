@@ -172,7 +172,7 @@ static struct file_operations fileop = {
 
 
 
-void setUpDispositivo(){
+void setUpDispositivo(void){
 
 	alloc_chrdev_region(&(disp.devTDispositivo),minor,1,"spkr");
 	disp.dev.owner = THIS_MODULE;
@@ -182,7 +182,7 @@ void setUpDispositivo(){
 	disp.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
 }
 
-void setUpVariablesSync(){
+void setUpVariablesSync(void){
 	rwlock_init(&(disp.lock_escritura));
 	spin_lock_init(&(disp.lock_escritura_buffer));
 	spin_lock_init(&(disp.lock_kfifo));
@@ -191,13 +191,13 @@ void setUpVariablesSync(){
 
 }
 
-void setUpTemporales(){
+void setUpTemporales(void){
 
 	disp.activo = 0;
 
 }
 
-void setUpPruebas(){
+void setUpPruebas(void){
 
 
 int mj, mn;
