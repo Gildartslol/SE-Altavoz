@@ -34,15 +34,32 @@ struct dispositivo
 	rwlock_t lock_escritura;
 	unsigned long flagsEscritura;
 
+	spinlock_t lock_escritura_buffer;
+	unsigned long flags_escritura_buffer;
+
+	spinlock_t lock_kfifo;
+	unsigned long flags_lock_kfifo;
+
+	wait_queue_head_t lista_bloq;
+
+	//modulo
+	struct kfifo cola_fifo;
+	struct timer_list contador;
+	int activo;
+
+
+
+	int terminado;
+
 } disp;
 
 static unsigned int minor = 0;
 static unsigned int tamanio_buffer = PAGE_SIZE;
-unsigned int buffer_limite = -1;
+unsigned int limite_buffer = -1;
 
 module_param(minor,int, S_IRUGO);
-
-
+module_param(tamanio_buffer, int, S_IRUGO);
+module_param(limite_buffer, int, S_IRUGO);
 
 static int abrir(struct inode *inode, struct file *descriptor){
 
@@ -91,6 +108,57 @@ static int spkr_fsync(struct file *descriptor, loff_t start, loff_t end, int dat
 static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t count , loff_t *f_pos){
 	printk(KERN_INFO "Write Module \n");
 
+
+
+	unsigned int countAux = count;
+	unsigned int despl = 0;
+	unsigned int copiado;
+
+	//seccion critica
+	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+	
+
+	disp.terminado = 0;
+
+	while(countAux > 0 ){
+
+		int isFull = kfifo_is_full(&(disp.cola_fifo));
+		// Bloqueamos el proceso hasta que se cumpla la condicion, que la fifo no esté llena.
+		if(wait_event_interruptible(disp.lista_bloq, !isFull) != 0 ){
+				// el bloqueo queda cancelado debido a que devuelve diferente de 0. Soltamos el lock y devolvemos error.
+			spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+			return -ERESTARTSYS;
+
+		}
+
+		//kfifo_from_user(fifo,from,len,copied)
+		if(kfifo_from_user(&(disp.cola_fifo),buf+despl,countAux, &copiado)!=0){
+			//algun error, volvemos a liberar el lock
+			spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);	
+			return -EFAULT;
+		}
+
+		//actualizamos
+
+		despl += copiado;
+		countAux -= copiado;
+
+		if(!disp.activo){
+
+
+
+
+
+		}
+
+
+	}
+
+
+	spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+
+	return count;
+
 }
 
 static struct file_operations fileop = {
@@ -107,27 +175,60 @@ static int __init setUp(void)
 	printk(KERN_INFO "Entering module\n");
 
 
+	kfifo_alloc(&(disp.cola_fifo),tamanio_buffer,GFP_KERNEL);
+
+	//dispositivo
+	setUpDispositivo();
+	
+	//sync variables
+	setUpVariablesSync();
+
+
+	//temporales
+
+	setUpTemporales();
+
+	//Pruebas
+	setUpPruebas();
+
+	
+
+	return 0;
+}
+
+void setUpDispositivo(){
+
 	alloc_chrdev_region(&(disp.devTDispositivo),minor,1,"spkr");
 	disp.dev.owner = THIS_MODULE;
 	cdev_init(&(disp.dev), &fileop);
 	cdev_add(&(disp.dev),disp.devTDispositivo,1);
 	disp.class = class_create(THIS_MODULE,"speaker");
 	disp.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
+}
 
-
-
-	//sync
+void setUpVariablesSync(){
 	rwlock_init(&(disp.lock_escritura));
+	spin_lock_init(&(disp.lock_escritura_buffer));
+	spin_lock_init(&(disp.lock_kfifo));
+	//cola de espera
+	init_waitqueue_head(&disp.lista_bloq);
+
+}
+
+void setUpTemporales(){
+
+	disp.activo = 0;
+
+}
+
+void setUpPruebas(){
 
 
-
-
-	int mj, mn;
+int mj, mn;
 	mj=MAJOR(disp.devTDispositivo);
 	mn=MINOR(disp.devTDispositivo);
 	printk(KERN_INFO "-minor %d   -major %d \n",mn,mj);
 
-	return 0;
 }
 
 static void __exit setDown(void)
