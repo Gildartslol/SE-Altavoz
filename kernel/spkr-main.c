@@ -46,7 +46,7 @@ struct dispositivo
 	struct kfifo cola_fifo;
 	struct timer_list contador;
 	int activo;
-
+	int resetearColaFifo;
 
 
 	int terminado;
@@ -142,12 +142,42 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 
 		despl += copiado;
 		countAux -= copiado;
-
+		printk(KERN_INFO "-copiado %d  -desplazamiento %d  -porCopiar \n",copiado,despl,countAux);	
 		if(!disp.activo){
 
+			unsigned char sonido[4];
+			unsigned int frec, ms;
+			int tamanio = 4;
+			disp.activo = 1;
+
+			//spkr_off();
+
+			if(disp.resetearColaFifo == 0){
+
+				if(kfifo_len(&(disp.cola_fifo)) >= 4 ){
+
+
+					// no se necesita extra locking para un lector y un escritor.
+					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
+					
+
+
+				}else{
 
 
 
+				}
+
+
+			}else{
+
+
+				kfifo_reset_out(&(disp.cola_fifo));
+				disp.resetearColaFifo = 0;
+				disp.activo = 0;
+				// if auxCount == 0...
+
+			}
 
 		}
 
@@ -197,10 +227,20 @@ void setUpTemporales(void){
 
 }
 
+void setUpFifo(void){
+
+	disp.resetearColaFifo = 0;
+
+	int error = kfifo_alloc(&(disp.cola_fifo),tamanio_buffer,GFP_KERNEL);
+	if(error != 0)
+		return -ENOMEM;
+
+}
+
 void setUpPruebas(void){
 
 
-int mj, mn;
+	int mj, mn;
 	mj=MAJOR(disp.devTDispositivo);
 	mn=MINOR(disp.devTDispositivo);
 	printk(KERN_INFO "-minor %d   -major %d \n",mn,mj);
@@ -212,8 +252,7 @@ static int __init setUp(void)
 {
 	printk(KERN_INFO "Entering module\n");
 
-
-	kfifo_alloc(&(disp.cola_fifo),tamanio_buffer,GFP_KERNEL);
+	setUpFifo();
 
 	//dispositivo
 	setUpDispositivo();
