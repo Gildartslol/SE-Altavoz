@@ -159,7 +159,7 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 
 					// no se necesita extra locking para un lector y un escritor.
 					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
-					
+
 
 
 				}else{
@@ -227,13 +227,12 @@ void setUpTemporales(void){
 
 }
 
-void setUpFifo(void){
+int setUpFifo(void){
 
 	disp.resetearColaFifo = 0;
 
 	int error = kfifo_alloc(&(disp.cola_fifo),tamanio_buffer,GFP_KERNEL);
-	if(error != 0)
-		return -ENOMEM;
+	return error;
 
 }
 
@@ -251,8 +250,10 @@ void setUpPruebas(void){
 static int __init setUp(void)
 {
 	printk(KERN_INFO "Entering module\n");
-
-	setUpFifo();
+	int error;
+	error = setUpFifo();
+	if(error != 0)
+		return -ENOMEM;
 
 	//dispositivo
 	setUpDispositivo();
