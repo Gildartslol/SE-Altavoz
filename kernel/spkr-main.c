@@ -22,6 +22,8 @@ MODULE_LICENSE("GPL");
 MODULE_ALIAS("platform:pcspkr");
 MODULE_LICENSE("Dual BSD/GPL");
 
+static int const CHAR_BIT = 8;
+
 struct dispositivo
 {
 	
@@ -124,25 +126,25 @@ void sonando(unsigned long countAux){
 
 					// no se necesita extra locking para un lector y un escritor.
 					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
-					frec = (unsigned char)sound[0] << CHAR_BIT | (unsigned char)sound[1];
-					ms = (unsigned char)sound[2] << CHAR_BIT | (unsigned char)sound[3];
+					frec = (unsigned char)sonido[0] << CHAR_BIT | (unsigned char)sonido[1];
+					ms = (unsigned char)sonido[2] << CHAR_BIT | (unsigned char)sonido[3];
 
 					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
 
 					disp.contador.data = countAux;
-					disp.timer.expires = jiffies + msecto_jiffies(ms);
+					disp.contador.expires = jiffies + msects_to_jiffies(ms);
 
 					if(frec != 0){
 
 							if(!disp.silencio)
-								spkir_on();
+								spkr_on();
 
 					}
 
 					add_timer(&(disp.contador));
 					//comprobar que hay mas sonidos
 
-					if(kfifo_avail(&(disp.cola_fifo)) >= remainder){
+					if(kfifo_avail(&(disp.cola_fifo)) >= countAux){
 						wake_up_interruptible(&(disp.lista_bloq));
 					}
 					if(kfifo_avail(&(disp.cola_fifo)) >= limite_buffer){
@@ -214,7 +216,7 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 			sonando(countAux);
 			
 	}
-	
+
 	spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 
 	return count;
