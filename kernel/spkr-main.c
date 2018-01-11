@@ -11,7 +11,7 @@
 #include <linux/ioctl.h>
 #include <asm/uaccess.h>
 
-#include <limits.h>
+#include <linux/limits.h>
 
 //#include "version.h"
 #include "spkr-io.h"
