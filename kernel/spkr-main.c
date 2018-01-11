@@ -11,6 +11,8 @@
 #include <linux/ioctl.h>
 #include <asm/uaccess.h>
 
+#include <limits.h>
+
 //#include "version.h"
 #include "spkr-io.h"
 
@@ -159,8 +161,9 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 
 					// no se necesita extra locking para un lector y un escritor.
 					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
-
-
+					frec = (unsigned char)sound[0] << CHAR_BIT | (unsigned char)sound[1];
+					ms = (unsigned char)sound[2] << CHAR_BIT | (unsigned char)sound[3];
+	
 
 				}else{
 
