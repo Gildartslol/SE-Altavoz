@@ -132,7 +132,7 @@ void sonando(unsigned long countAux){
 					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
 
 					disp.contador.data = countAux;
-					disp.contador.expires = jiffies + msects_to_jiffies(ms);
+					disp.contador.expires = jiffies + msecs_to_jiffies(ms);
 
 					if(frec != 0){
 
