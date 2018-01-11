@@ -49,6 +49,7 @@ struct dispositivo
 	struct timer_list contador;
 	int activo;
 	int resetearColaFifo;
+	int silencio;
 
 
 	int terminado;
@@ -107,6 +108,70 @@ static int spkr_fsync(struct file *descriptor, loff_t start, loff_t end, int dat
 	return 0;
 }
 
+void sonando(unsigned long countAux){
+
+			unsigned char sonido[4];
+			unsigned int frec, ms;
+			int tamanio = 4;
+			disp.activo = 1;
+
+			//spkr_off();
+
+			if(disp.resetearColaFifo == 0){
+
+				if(kfifo_len(&(disp.cola_fifo)) >= 4 ){
+
+
+					// no se necesita extra locking para un lector y un escritor.
+					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
+					frec = (unsigned char)sound[0] << CHAR_BIT | (unsigned char)sound[1];
+					ms = (unsigned char)sound[2] << CHAR_BIT | (unsigned char)sound[3];
+
+					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
+
+					disp.contador.data = countAux;
+					disp.timer.expires = jiffies + msecto_jiffies(ms);
+
+					if(frec != 0){
+
+							if(!disp.silencio)
+								spkir_on();
+
+					}
+
+					add_timer(&(disp.contador));
+					//comprobar que hay mas sonidos
+
+					if(kfifo_avail(&(disp.cola_fifo)) >= remainder){
+						wake_up_interruptible(&(disp.lista_bloq));
+					}
+					if(kfifo_avail(&(disp.cola_fifo)) >= limite_buffer){
+						wake_up_interruptible(&(disp.lista_bloq));
+					}
+
+				}else{
+					disp.activo = 0;
+					if(countAux == 0){
+
+						disp.resetearColaFifo = 0;
+						disp.terminado = 1;
+						// fsync
+					}
+				}
+
+			}else{
+
+
+				kfifo_reset_out(&(disp.cola_fifo));
+				disp.resetearColaFifo = 0;
+				disp.activo = 0;
+				// if auxCount == 0...
+
+			}
+
+
+}
+
 static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t count , loff_t *f_pos){
 	printk(KERN_INFO "Write Module \n");
 
@@ -145,49 +210,11 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 		despl += copiado;
 		countAux -= copiado;
 		printk(KERN_INFO "-copiado %d  -desplazamiento %d  -porCopiar \n",copiado,despl,countAux);	
-		if(!disp.activo){
-
-			unsigned char sonido[4];
-			unsigned int frec, ms;
-			int tamanio = 4;
-			disp.activo = 1;
-
-			//spkr_off();
-
-			if(disp.resetearColaFifo == 0){
-
-				if(kfifo_len(&(disp.cola_fifo)) >= 4 ){
-
-
-					// no se necesita extra locking para un lector y un escritor.
-					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
-					frec = (unsigned char)sound[0] << CHAR_BIT | (unsigned char)sound[1];
-					ms = (unsigned char)sound[2] << CHAR_BIT | (unsigned char)sound[3];
-	
-
-				}else{
-
-
-
-				}
-
-
-			}else{
-
-
-				kfifo_reset_out(&(disp.cola_fifo));
-				disp.resetearColaFifo = 0;
-				disp.activo = 0;
-				// if auxCount == 0...
-
-			}
-
-		}
-
-
+		if(!disp.activo)
+			sonando(countAux);
+			
 	}
-
-
+	
 	spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 
 	return count;
@@ -226,7 +253,12 @@ void setUpVariablesSync(void){
 
 void setUpTemporales(void){
 
+
+	init_timer(&(disp.contador));
+	disp.contador.function = sonando;
+
 	disp.activo = 0;
+	disp.silencio = 0;
 
 }
 
