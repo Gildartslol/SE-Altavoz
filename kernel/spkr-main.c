@@ -70,13 +70,13 @@ static int abrir(struct inode *inode, struct file *descriptor){
 
 	if((descriptor->f_mode & O_ACCMODE) == FMODE_READ){
 
-		printk(KERN_INFO "Open module\n");
+		printk(KERN_INFO "Abriendo modulo\n");
 
 	}else{
 			if(((descriptor->f_mode & O_ACCMODE) == FMODE_WRITE && (write_trylock(&(disp.lock_escritura))==0))){
 				return -EBUSY;
 			}
-		printk(KERN_INFO "Open module\n");
+		printk(KERN_INFO "Abriendo module\n");
 	}
 
 	
@@ -118,7 +118,7 @@ void sonando(unsigned long countAux){
 			disp.activo = 1;
 
 			//spkr_off();
-
+			printk(KERN_INFO "Speaker OFF");		
 			if(disp.resetearColaFifo == 0){
 
 				if(kfifo_len(&(disp.cola_fifo)) >= 4 ){
@@ -129,6 +129,8 @@ void sonando(unsigned long countAux){
 					frec = (unsigned char)sonido[0] << CHAR_BIT | (unsigned char)sonido[1];
 					ms = (unsigned char)sonido[2] << CHAR_BIT | (unsigned char)sonido[3];
 
+					printk(KERN_INFO "Primero %s  Segundo %s",sonido[0],sonido[1]);		
+					printk(KERN_INFO "Tercero %s  Cuarto %s",sonido[2],sonido[3]);
 					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
 
 					disp.contador.data = countAux;
@@ -136,8 +138,12 @@ void sonando(unsigned long countAux){
 
 					if(frec != 0){
 
-							if(!disp.silencio)
-								spkr_on();
+							if(!disp.silencio){
+									spkr_on();
+									printk(KERN_INFO "Speaker ON");	
+							}
+
+							}
 
 					}
 
@@ -211,7 +217,7 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 
 		despl += copiado;
 		countAux -= copiado;
-		printk(KERN_INFO "-copiado %d  -desplazamiento %d  -porCopiar \n",copiado,despl,countAux);	
+		printk(KERN_INFO "-copiado %d  -desplazamiento %d  -porCopiar %d \n",copiado,despl,countAux);	
 		if(!disp.activo)
 			sonando(countAux);
 			
