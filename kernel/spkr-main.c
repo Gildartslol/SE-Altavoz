@@ -112,27 +112,32 @@ static int spkr_fsync(struct file *descriptor, loff_t start, loff_t end, int dat
 
 void sonando(unsigned long countAux){
 
+
+
+			printk(KERN_INFO "Entrando en sonando()");	
 			unsigned char sonido[4];
 			unsigned int frec, ms;
 			int tamanio = 4;
 			disp.activo = 1;
 
-			//spkr_off();
-			printk(KERN_INFO "Speaker OFF");		
+			spkr_off();
+
+			
 			if(disp.resetearColaFifo == 0){
 
-				if(kfifo_len(&(disp.cola_fifo)) >= 4 ){
+				if(kfifo_len(&(disp.cola_fifo)) >= tamanio ){
 
 
 					// no se necesita extra locking para un lector y un escritor.
 					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
-					
+
+					//frec = (unsigned char)sonido[0] << CHAR_BIT | (unsigned char)sonido[1];
+					//ms = (unsigned char)sonido[2] << CHAR_BIT | (unsigned char)sonido[3];
+
+
 					frec = ((int) sonido[1] << CHAR_BIT) | sonido[0];
 					ms = ((int) sonido[3] << CHAR_BIT) | sonido[2];
-					
-					
-					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
-
+	
 					disp.contador.data = countAux;
 					disp.contador.expires = jiffies + msecs_to_jiffies(ms);
 
@@ -142,6 +147,10 @@ void sonando(unsigned long countAux){
 									spkr_on();
 									printk(KERN_INFO "Speaker ON");	
 							}
+					}else{
+						
+						spkr_off();
+						printk(KERN_INFO "Speaker OFF");		
 					}
 
 					add_timer(&(disp.contador));
