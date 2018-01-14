@@ -129,16 +129,14 @@ void sonando(unsigned long countAux){
 					frec = (unsigned char)sonido[0] << CHAR_BIT | (unsigned char)sonido[1];
 					ms = (unsigned char)sonido[2] << CHAR_BIT | (unsigned char)sonido[3];
 
-					printk(KERN_INFO "Primero %s  Segundo %s",sonido[0],sonido[1]);		
-					printk(KERN_INFO "Tercero %s  Cuarto %s",sonido[2],sonido[3]);
+					printk(KERN_INFO "ArraySonido",sonido);		
 					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
 
 					disp.contador.data = countAux;
 					disp.contador.expires = jiffies + msecs_to_jiffies(ms);
 
-					
 					if(frec != 0){
-
+						set_spkr_frecuency(frec);
 							if(!disp.silencio){
 									spkr_on();
 									printk(KERN_INFO "Speaker ON");	
