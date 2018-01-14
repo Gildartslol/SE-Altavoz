@@ -7,15 +7,6 @@
 #include <linux/fs.h>
 #include <linux/wait.h>
 #include <linux/sched.h>
-#include <linux/init.h>		/* Needed for the macros */
-#include <linux/module.h>	/* Needed by all modules */
-
-#include <linux/version.h>
-#include <linux/cdev.h>
-#include <linux/device.h>
-#include <linux/fs.h>
-#include <linux/wait.h>
-#include <linux/sched.h>
 #include <linux/kfifo.h>
 #include <linux/ioctl.h>
 #include <asm/uaccess.h>
@@ -196,20 +187,20 @@ void sonando(unsigned long countAux){
 					printk(KERN_INFO "len de la fifo no mayor que 4");	
 
 					//disp.activo = 0;
-					if(countAux == 0){
+					//if(countAux == 0){
 
-						disp.resetearColaFifo = 0;
-						disp.terminado = 1;
+					//	disp.resetearColaFifo = 0;
+					//	disp.terminado = 1;
 						// fsync
-					}
+					//}
 				}
 
 			}else{
 
 				printk(KERN_INFO "RESET COLA FIFO");	
-				kfifo_reset_out(&(disp.cola_fifo));
-				disp.resetearColaFifo = 0;
-				disp.activo = 0;
+				//kfifo_reset_out(&(disp.cola_fifo));
+				//disp.resetearColaFifo = 0;
+				//disp.activo = 0;
 				// if auxCount == 0...
 
 			}
