@@ -45,6 +45,7 @@ struct dispositivo
 	unsigned long flags_lock_kfifo;
 
 	wait_queue_head_t lista_bloq;
+	wait_queue_head_t lista_sync;
 
 	//modulo
 	struct kfifo cola_fifo;
@@ -106,7 +107,22 @@ static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned l
 	return 0;
 }
 
-static int spkr_fsync(struct file *descriptor, loff_t start, loff_t end, int datasync){
+static int sincronizar(struct file *descriptor, loff_t start, loff_t end, int datasync){
+
+
+	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+
+
+	if(wait_event_interruptible(&(disp.lista_sync,disp.terminado) != 0)){
+
+		spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+		return -ERESTARTSYS;
+
+	}
+
+
+	spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+
 	return 0;
 }
 
@@ -120,7 +136,7 @@ void sonando(unsigned long countAux){
 			int tamanio = 4;
 			disp.activo = 1;
 
-			spkr_off();
+			//spkr_off();
 
 			
 			if(disp.resetearColaFifo == 0){
@@ -148,7 +164,7 @@ void sonando(unsigned long countAux){
 									printk(KERN_INFO "Speaker ON");	
 							}
 					}else{
-						
+
 						spkr_off();
 						printk(KERN_INFO "Speaker OFF");		
 					}
@@ -158,8 +174,11 @@ void sonando(unsigned long countAux){
 
 					if(kfifo_avail(&(disp.cola_fifo)) >= countAux){
 						wake_up_interruptible(&(disp.lista_bloq));
+						printk(KERN_INFO "Se desbloquea proceso escritor");		
+					
 					}
 					if(kfifo_avail(&(disp.cola_fifo)) >= limite_buffer){
+						printk(KERN_INFO "Se desbloquea proceso escritor");	
 						wake_up_interruptible(&(disp.lista_bloq));
 					}
 
@@ -240,7 +259,7 @@ static struct file_operations fileop = {
 	.open = abrir,
 	.release = cerrar,
 	.write = escribir,
-	.fsync = spkr_fsync,
+	.fsync = sincronizar,
 	.unlocked_ioctl = ioctl_function
 };
 
@@ -262,6 +281,7 @@ void setUpVariablesSync(void){
 	spin_lock_init(&(disp.lock_kfifo));
 	//cola de espera
 	init_waitqueue_head(&disp.lista_bloq);
+	init_waitqueue_head(&disp.lista_sync);
 
 }
 
@@ -279,13 +299,12 @@ void setUpTemporales(void){
 int setUpFifo(void){
 
 	disp.resetearColaFifo = 0;
-
 	int error = kfifo_alloc(&(disp.cola_fifo),tamanio_buffer,GFP_KERNEL);
 	return error;
 
 }
 
-void setUpPruebas(void){
+void setUpTraza(void){
 
 
 	int mj, mn;
@@ -298,9 +317,8 @@ void setUpPruebas(void){
 
 static int __init setUp(void)
 {
-	printk(KERN_INFO "Entering module\n");
-	int error;
-	error = setUpFifo();
+	printk(KERN_INFO "INIT MODULE\n");
+	int error = setUpFifo();
 	if(error != 0)
 		return -ENOMEM;
 
@@ -316,7 +334,7 @@ static int __init setUp(void)
 	setUpTemporales();
 
 	//Pruebas
-	setUpPruebas();
+	setUpTraza();
 
 	
 
