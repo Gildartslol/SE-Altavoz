@@ -126,13 +126,16 @@ void sonando(unsigned long countAux){
 
 					// no se necesita extra locking para un lector y un escritor.
 					int i  = kfifo_out(&(disp.cola_fifo),sonido,tamanio);
-					//frec = (unsigned char)sonido[0] << CHAR_BIT | (unsigned char)sonido[1];
-					//ms = (unsigned char)sonido[2] << CHAR_BIT | (unsigned char)sonido[3];
-
-					frec = ((int) sonido[1] << 8) | sonido[0];
-					ms = ((int) sonido[3] << 8) | sonido[2];
 					
-					printk(KERN_INFO "ArraySonido %s",*sonido);			
+					frec = (int)sonido[0] << CHAR_BIT | sonido[1];
+					ms = (int)sonido[2] << CHAR_BIT | sonido[3];
+					
+					printk(KERN_INFO "FrecuenciaAUX %d  TiempoAUX %d",frec,ms);
+					
+					frec = ((int) sonido[1] << CHAR_BIT) | sonido[0];
+					ms = ((int) sonido[3] << CHAR_BIT) | sonido[2];
+					
+					
 					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
 
 					disp.contador.data = countAux;
