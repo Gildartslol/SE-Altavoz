@@ -129,7 +129,7 @@ void sonando(unsigned long countAux){
 					frec = (unsigned char)sonido[0] << CHAR_BIT | (unsigned char)sonido[1];
 					ms = (unsigned char)sonido[2] << CHAR_BIT | (unsigned char)sonido[3];
 
-					printk(KERN_INFO "ArraySonido %s",&sonido);			
+					printk(KERN_INFO "ArraySonido %s",*sonido);			
 					printk(KERN_INFO "Frecuencia %d  Tiempo %d",frec,ms);
 
 					disp.contador.data = countAux;
