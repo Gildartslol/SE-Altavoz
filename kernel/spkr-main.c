@@ -249,7 +249,7 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 	}
 
 	spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
-
+	printk(KERN_INFO "Escritura finalizada");	
 	return count;
 
 }
