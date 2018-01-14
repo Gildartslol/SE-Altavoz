@@ -24,7 +24,9 @@ void set_spkr_frecuency(unsigned int frecuency){
 	unsigned long flags;
 	unsigned int freq = 1000;
 	if (frecuency > 20 && frecuency < 32767)
-		frecuency = PIT_TICK_RATE / frecuency;
+		freq = PIT_TICK_RATE / frecuency;
+
+	printk(KERN_INFO "FRECUENCIA FIJADA EN %d\n",freq);	
 	
 	outb_p(0xb6,SPKR_REGISTRO_CONTROL);
 
