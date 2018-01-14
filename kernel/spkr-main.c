@@ -136,15 +136,13 @@ void sonando(unsigned long countAux){
 					disp.contador.data = countAux;
 					disp.contador.expires = jiffies + msecs_to_jiffies(ms);
 
+					
 					if(frec != 0){
 
 							if(!disp.silencio){
 									spkr_on();
 									printk(KERN_INFO "Speaker ON");	
 							}
-
-							}
-
 					}
 
 					add_timer(&(disp.contador));
