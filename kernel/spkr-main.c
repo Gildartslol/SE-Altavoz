@@ -172,15 +172,17 @@ void sonando(unsigned long countAux){
 					add_timer(&(disp.contador));
 					//comprobar que hay mas sonidos
 
-					if(kfifo_avail(&(disp.cola_fifo)) >= countAux){
+										if(kfifo_avail(&(disp.cola_fifo)) >= countAux){
 						wake_up_interruptible(&(disp.lista_bloq));
 						printk(KERN_INFO "Se desbloquea proceso escritor");		
 					
-					}
+					}else {
+						
 					if(kfifo_avail(&(disp.cola_fifo)) >= limite_buffer){
 						printk(KERN_INFO "Se desbloquea proceso escritor");	
 						wake_up_interruptible(&(disp.lista_bloq));
 					}
+				}
 
 				}else{
 					disp.activo = 0;
