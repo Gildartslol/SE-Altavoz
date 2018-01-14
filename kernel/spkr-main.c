@@ -5,7 +5,7 @@
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/fs.h>
-#include <linux/wait.h
+#include <linux/wait.h>
 #include <linux/sched.h>
 #include <linux/init.h>		/* Needed for the macros */
 #include <linux/module.h>	/* Needed by all modules */
