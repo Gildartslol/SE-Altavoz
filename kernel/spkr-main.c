@@ -5,6 +5,15 @@
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/fs.h>
+#include <linux/wait.h
+#include <linux/sched.h>
+#include <linux/init.h>		/* Needed for the macros */
+#include <linux/module.h>	/* Needed by all modules */
+
+#include <linux/version.h>
+#include <linux/cdev.h>
+#include <linux/device.h>
+#include <linux/fs.h>
 #include <linux/wait.h>
 #include <linux/sched.h>
 #include <linux/kfifo.h>
@@ -96,9 +105,6 @@ static int cerrar(struct inode *inode, struct file *descriptor){
 			
 	}
 
-
-
-	printk(KERN_INFO "Close Module \n");
 	return 0;
 }
 
@@ -189,7 +195,7 @@ void sonando(unsigned long countAux){
 
 					printk(KERN_INFO "len de la fifo no mayor que 4");	
 
-					disp.activo = 0;
+					//disp.activo = 0;
 					if(countAux == 0){
 
 						disp.resetearColaFifo = 0;
@@ -228,7 +234,6 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 
 	while(countAux > 0 ){
 
-		int isFull = kfifo_is_full(&(disp.cola_fifo));
 		// Bloqueamos el proceso hasta que se cumpla la condicion, que la fifo no esté llena.
 		if(wait_event_interruptible(disp.lista_bloq, !kfifo_is_full(&(disp.cola_fifo))) != 0 ){
 				// el bloqueo queda cancelado debido a que devuelve diferente de 0. Soltamos el lock y devolvemos error.
