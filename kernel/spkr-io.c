@@ -22,17 +22,17 @@ unsigned long spkrFlags;
 void set_spkr_frecuency(unsigned int frecuency){
 
 	unsigned long flags;
-	unsigned int freq = 1000;
+	unsigned int frec = 1000;
 	if (frecuency > 20 && frecuency < 32767)
-		freq = PIT_TICK_RATE / frecuency;
-			
-	printk(KERN_INFO "FRECUENCIA FIJADA EN %d\n",freq);	
+		frec = PIT_TICK_RATE / frecuency;
+
+	printk(KERN_INFO "FRECUENCIA FIJADA EN %d\n",frec);	
 	
 	outb_p(0xb6,SPKR_REGISTRO_CONTROL);
 
 	raw_spin_lock_irqsave(&i8253_lock,flags);
-	outb_p(freq & 0xff,SPKR_REGISTRO_DATOS);
-	outb_p(freq >> 8,SPKR_REGISTRO_DATOS);
+	outb_p(frec & 0xff,SPKR_REGISTRO_DATOS);
+	outb_p(frec >> 8,SPKR_REGISTRO_DATOS);
 	raw_spin_unlock_irqrestore(&i8253_lock,flags);
 
 }
