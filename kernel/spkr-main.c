@@ -230,7 +230,7 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 
 		int isFull = kfifo_is_full(&(disp.cola_fifo));
 		// Bloqueamos el proceso hasta que se cumpla la condicion, que la fifo no esté llena.
-		if(wait_event_interruptible(disp.lista_bloq, !isFull) != 0 ){
+		if(wait_event_interruptible(disp.lista_bloq, !kfifo_is_full(&(disp.cola_fifo))) != 0 ){
 				// el bloqueo queda cancelado debido a que devuelve diferente de 0. Soltamos el lock y devolvemos error.
 			spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 			return -ERESTARTSYS;
