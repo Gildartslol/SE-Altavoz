@@ -185,6 +185,10 @@ void sonando(unsigned long countAux){
 				}
 
 				}else{
+					
+					printk(KERN_INFO "len de la fifo no mayor que 4");	
+	
+
 					disp.activo = 0;
 					if(countAux == 0){
 
@@ -195,8 +199,8 @@ void sonando(unsigned long countAux){
 				}
 
 			}else{
-
-
+				printk(KERN_INFO "RESET COLA FIFO");	
+				
 				kfifo_reset_out(&(disp.cola_fifo));
 				disp.resetearColaFifo = 0;
 				disp.activo = 0;
