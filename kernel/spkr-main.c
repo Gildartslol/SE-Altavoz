@@ -113,7 +113,7 @@ static int sincronizar(struct file *descriptor, loff_t start, loff_t end, int da
 	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 
 
-	if(wait_event_interruptible(&(disp.lista_sync),disp.terminado) != 0)){
+	if(wait_event_interruptible(&(disp.lista_sync),disp.terminado) != 0){
 
 		spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 		return -ERESTARTSYS;
