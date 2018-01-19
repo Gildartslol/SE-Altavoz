@@ -106,7 +106,7 @@ static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned l
 
 static int sincronizar(struct file *descriptor, loff_t start, loff_t end, int datasync){
 
-
+	 
 	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 
 
@@ -275,6 +275,11 @@ void setUpDispositivo(void){
 	cdev_add(&(disp.dev),disp.devTDispositivo,1);
 	disp.class = class_create(THIS_MODULE,"speaker");
 	disp.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
+	
+	
+	// prueba por errores con buffer a 32 en una sola escritura?
+	if(tamanio_buffer != PAGE_SIZE)
+		limite_buffer = tamanio_buffer;
 }
 
 void setUpVariablesSync(void){
