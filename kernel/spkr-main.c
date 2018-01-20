@@ -192,7 +192,7 @@ void sonando(unsigned long countAux){
 						disp.resetearColaFifo = 1;
 						disp.terminado = 1;
 						wake_up_interruptible(&(disp.lista_sync));
-					//}
+					}
 				}
 
 			}else{
