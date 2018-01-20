@@ -341,7 +341,7 @@ static int __init setUp(void)
 	//FIFO BUFFER
 	int error = setUpFifo();
 	if(error != 0)
-		return -ENOMEM;
+		return -1;
 
 	//dispositivo
 	int errorParam = setUpDispositivo();
