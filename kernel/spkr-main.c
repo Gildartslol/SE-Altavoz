@@ -106,7 +106,7 @@ static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned l
 
 static int sincronizar(struct file *descriptor, loff_t start, loff_t end, int datasync){
 
-	 
+
 	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 
 
@@ -127,7 +127,7 @@ void sonando(unsigned long countAux){
 
 
 
-			printk(KERN_INFO "Entrando en sonando()");	
+			printk(KERN_INFO "------INICIO SONIDO");	
 			unsigned char sonido[4];
 			unsigned int frec, ms;
 			int tamanio = 4;
@@ -136,7 +136,7 @@ void sonando(unsigned long countAux){
 			//spkr_off();
 
 			
-			if(disp.resetearColaFifo == 0){
+			if(!(disp.resetearColaFifo)){
 
 				if(kfifo_len(&(disp.cola_fifo)) >= tamanio ){
 
@@ -172,38 +172,42 @@ void sonando(unsigned long countAux){
 
 					if(kfifo_avail(&(disp.cola_fifo)) >= countAux){
 						wake_up_interruptible(&(disp.lista_bloq));
-						printk(KERN_INFO "Se desbloquea proceso escritor");		
+						printk(KERN_INFO "Desbloqueo ESCRITOR por sitio en la pila.");		
 					
 					}else {
 
 					if(kfifo_avail(&(disp.cola_fifo)) >= limite_buffer){
-						printk(KERN_INFO "Se desbloquea proceso escritor");	
+						printk(KERN_INFO "Desbloqueo ESCRITOR por sitio en la pila mayorIgual que limite buffer.");	
 						wake_up_interruptible(&(disp.lista_bloq));
 					}
 				}
 
 				}else{
 
-					printk(KERN_INFO "len de la fifo no mayor que 4");	
+					printk(KERN_INFO "El buffer no tiene 4 bytes.");	
 
-					//disp.activo = 0;
-					//if(countAux == 0){
+					disp.activo = 0;
+					if(countAux == 0){
 
-					//	disp.resetearColaFifo = 0;
-					//	disp.terminado = 1;
-						// fsync
+						disp.resetearColaFifo = 1;
+						disp.terminado = 1;
+						wake_up_interruptible(&(disp.lista_sync));
 					//}
 				}
 
 			}else{
 
 				printk(KERN_INFO "RESET COLA FIFO");	
-				//kfifo_reset_out(&(disp.cola_fifo));
-				//disp.resetearColaFifo = 0;
-				//disp.activo = 0;
-				// if auxCount == 0...
+				kfifo_reset_out(&(disp.cola_fifo));
+				disp.resetearColaFifo = 0;
+				disp.activo = 0;
 
-			}
+				if(countAux == 0){
+						disp.terminado = 1;
+						wake_up_interruptible(&(disp.lista_sync));
+				}
+
+				printk(KERN_INFO "-----FIN SONIDO");	
 
 
 }
@@ -244,7 +248,7 @@ static ssize_t escribir(struct file *descriptor, const char __user *buf, size_t 
 
 		despl += copiado;
 		countAux -= copiado;
-		printk(KERN_INFO "-copiado %d  -desplazamiento %d  -porCopiar %d \n",copiado,despl,countAux);	
+		printk(KERN_INFO "-copiado %d  -desplazamiento %d  -porCopiar %d DispositivoActivo %d \n",copiado,despl,countAux,disp.activo);	
 		if(!disp.activo)
 			sonando(countAux);
 			
@@ -267,7 +271,7 @@ static struct file_operations fileop = {
 
 
 
-void setUpDispositivo(void){
+int setUpDispositivo(void){
 
 	alloc_chrdev_region(&(disp.devTDispositivo),minor,1,"spkr");
 	disp.dev.owner = THIS_MODULE;
@@ -275,11 +279,17 @@ void setUpDispositivo(void){
 	cdev_add(&(disp.dev),disp.devTDispositivo,1);
 	disp.class = class_create(THIS_MODULE,"speaker");
 	disp.device = device_create(disp.class,NULL,disp.devTDispositivo,NULL,"intspkr");
-	
-	
+
+
 	// prueba por errores con buffer a 32 en una sola escritura?
 	if(tamanio_buffer != PAGE_SIZE)
 		limite_buffer = tamanio_buffer;
+
+	if(limitebuffer > tamanio_buffer){
+		return -1;
+	}
+	
+	return 0;
 }
 
 void setUpVariablesSync(void){
@@ -318,6 +328,7 @@ void setUpTraza(void){
 	mj=MAJOR(disp.devTDispositivo);
 	mn=MINOR(disp.devTDispositivo);
 	printk(KERN_INFO "-minor %d   -major %d \n",mn,mj);
+	printk(KERN_INFO "-tamañobuffer %d   -limitebuffer %d \n",tamanio_buffer,limite_buffer);
 
 }
 
@@ -325,13 +336,18 @@ void setUpTraza(void){
 static int __init setUp(void)
 {
 	printk(KERN_INFO "INIT MODULE\n");
+
+	//FIFO BUFFER
 	int error = setUpFifo();
 	if(error != 0)
 		return -ENOMEM;
 
 	//dispositivo
-	setUpDispositivo();
-	
+	int errorParam = setUpDispositivo();
+	if(errorParam != 0)
+		return -EFAULT;
+
+
 	//sync variables
 	setUpVariablesSync();
 
@@ -349,15 +365,29 @@ static int __init setUp(void)
 }
 
 
-
-static void __exit setDown(void)
-{
-	printk(KERN_INFO "Exiting Module \n");
+void setDownDispositivo(void){
 
 	device_destroy(disp.class,disp.devTDispositivo);
 	class_destroy(disp.class);
 	cdev_del(&(disp.dev));
 	unregister_chrdev_region(disp.devTDispositivo,1);
+
+}
+
+
+static void __exit setDown(void)
+{
+
+	spkr_off();
+	kfifo_free(&(disp.cola_fifo));
+	del_timer_sync(&(disp.contador));
+	setDownDispositivo();
+
+
+
+	printk(KERN_INFO "Exiting Module \n");
+
+	
 
 
 }
