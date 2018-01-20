@@ -286,7 +286,7 @@ int setUpDispositivo(void){
 	if(tamanio_buffer != PAGE_SIZE)
 		limite_buffer = tamanio_buffer;
 
-	if(limitebuffer > tamanio_buffer){
+	if(limite_buffer > tamanio_buffer){
 		return -1;
 	}
 	
