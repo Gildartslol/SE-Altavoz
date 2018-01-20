@@ -206,6 +206,7 @@ void sonando(unsigned long countAux){
 						disp.terminado = 1;
 						wake_up_interruptible(&(disp.lista_sync));
 				}
+				}
 
 				printk(KERN_INFO "-----FIN SONIDO");	
 
