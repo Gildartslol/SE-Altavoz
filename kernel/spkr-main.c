@@ -283,7 +283,7 @@ int setUpDispositivo(void){
 
 
 	// prueba por errores con buffer a 32 en una sola escritura?
-	if(tamanio_buffer != PAGE_SIZE)
+	if(limite_buffer == -1)
 		limite_buffer = tamanio_buffer;
 
 	if(limite_buffer > tamanio_buffer){
