@@ -340,12 +340,12 @@ static int __init setUp(void)
 
 	//FIFO BUFFER
 	int error = setUpFifo();
-	if(error != 0)
-		return -EFAULT;
+	if(error == -1)
+		return -EPERM;
 
 	//dispositivo
 	int errorParam = setUpDispositivo();
-	if(errorParam != 0)
+	if(errorParam == -1)
 		return -EPERM;
 
 
