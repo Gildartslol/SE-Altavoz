@@ -346,7 +346,7 @@ static int __init setUp(void)
 	//dispositivo
 	int errorParam = setUpDispositivo();
 	if(errorParam != 0)
-		return -EFAULT;
+		return -EPERM;
 
 
 	//sync variables
