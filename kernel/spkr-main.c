@@ -104,6 +104,29 @@ static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned l
 	return 0;
 }
 
+
+#ifdef V3_0
+static int sincronizar(struct file *filp, int datasync){
+
+
+	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+
+
+	if(wait_event_interruptible(disp.lista_sync,disp.terminado) != 0){
+
+		spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+		return -ERESTARTSYS;
+
+	}
+
+
+	spin_unlock_irqrestore(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
+
+	return 0;
+}
+#endif
+
+#ifdef V3_1
 static int sincronizar(struct file *descriptor, loff_t start, loff_t end, int datasync){
 
 
@@ -122,7 +145,7 @@ static int sincronizar(struct file *descriptor, loff_t start, loff_t end, int da
 
 	return 0;
 }
-
+#endif
 void sonando(unsigned long countAux){
 
 
@@ -157,12 +180,12 @@ void sonando(unsigned long countAux){
 					if(frec != 0){
 						set_spkr_frecuency(frec);
 							if(!disp.silencio){
-								printk(KERN_INFO "Speaker ON");	
+								printk(KERN_INFO "Speaker ON --- TIEMPO %d",ms);	
 								spkr_on();
 									
 							}
 					}else{
-						printk(KERN_INFO "Speaker OFF");	
+						printk(KERN_INFO "Speaker OFF --- TIEMPO %d",ms);	
 						spkr_off();
 							
 					}
@@ -206,7 +229,7 @@ void sonando(unsigned long countAux){
 						disp.terminado = 1;
 						wake_up_interruptible(&(disp.lista_sync));
 				}
-				}
+			}
 
 				printk(KERN_INFO "-----FIN SONIDO");	
 
