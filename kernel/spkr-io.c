@@ -6,11 +6,13 @@
 #include <linux/io.h>
 #include "spkr-io.h"
 
-if LINUX_VERSION_CODE == KERNEL_VERSION(3,0,1)
+#ifdef V3_1
 #include <linux/i8253.h>
+#endif
 
-if LINUX_VERSION_CODE == KERNEL_VERSION(3,0,0)
+#ifdef V3_0
 extern raw_spinlock_t i8225_lock
+#endif
 
 
 #define SPKR_REGISTRO_CONTROL 0x43
