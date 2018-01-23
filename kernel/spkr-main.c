@@ -107,8 +107,8 @@ static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned l
 
 #ifdef V3_0
 static int sincronizar(struct file *filp, int datasync){
-
-
+	
+	printk(KERN_INFO "FSYNC");	
 	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 
 
@@ -129,7 +129,7 @@ static int sincronizar(struct file *filp, int datasync){
 #ifdef V3_1
 static int sincronizar(struct file *descriptor, loff_t start, loff_t end, int datasync){
 
-
+	printk(KERN_INFO "FSYNC");	
 	spin_lock_irqsave(&(disp.lock_escritura_buffer),disp.flags_escritura_buffer);
 
 
