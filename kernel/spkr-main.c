@@ -139,6 +139,9 @@ static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned l
 
 	}
 
+	return 0;
+}
+
 
 #ifdef V3_0
 static int sincronizar(struct file *filp, int datasync){
