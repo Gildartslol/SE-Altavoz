@@ -24,6 +24,12 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 static int const CHAR_BIT = 8;
 
+
+#define IOCTL_NUMERO_MAGICO '9'
+#define IOCTL_SET_MUTE _IOW(IOCTL_NUMERO_MAGICO,1,int)
+#define IOCTL_GET_MUTE _IOR(IOCTL_NUMERO_MAGICO,2,int)
+#define IOCTL_RESET _IO(IOCTL_NUMERO_MAGICO,3)
+
 struct dispositivo
 {
 	
@@ -101,8 +107,37 @@ static int cerrar(struct inode *inode, struct file *descriptor){
 
 static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned long arg){
 
-	return 0;
-}
+
+	switch(cmd){
+
+
+		case IOCTL_SET_MUTE:
+		//saca del mapa de usuario un 1 o un 0;
+		long result = __get_user(disp.silencio,(int __user *) arg);
+			if(disp.silencio)
+				spkr_off();
+			if(!disp.silencio)
+				spkr_on();
+			return result;
+		break;
+
+		case IOCTL_GET_MUTE:
+			//pone el mapa de usuario el disp.silencio.
+			return __put_user(disp.silencio,(int __user *)arg);
+
+			break;
+		break;
+
+		case IOCTL_RESET:
+		if(kfifo_is_empty(&(disp.cola_fifo)))
+			disp.resetearColaFifo=1;
+
+		return 0 ;
+
+		break;
+
+
+	}
 
 
 #ifdef V3_0
