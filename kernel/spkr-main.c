@@ -107,18 +107,18 @@ static int cerrar(struct inode *inode, struct file *descriptor){
 
 static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned long arg){
 
-
+	long mute;
 	switch(cmd){
 
 
 		case IOCTL_SET_MUTE:
 		//saca del mapa de usuario un 1 o un 0;
-		long result = __get_user(disp.silencio,(int __user *) arg);
+		 mute = __get_user(disp.silencio, (int __user *) arg);
 			if(disp.silencio)
 				spkr_off();
 			if(!disp.silencio)
 				spkr_on();
-			return result;
+			return mute;
 		break;
 
 		case IOCTL_GET_MUTE:
