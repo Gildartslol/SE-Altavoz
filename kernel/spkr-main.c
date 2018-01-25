@@ -114,10 +114,13 @@ static long ioctl_function(struct file *descriptor, unsigned int cmd, unsigned l
 		case IOCTL_SET_MUTE:
 		//saca del mapa de usuario un 1 o un 0;
 		 mute = __get_user(disp.silencio, (int __user *) arg);
-			if(disp.silencio)
-				spkr_off();
-			if(!disp.silencio)
-				spkr_on();
+		printk(KERN_INFO "MUTE : %d\n",mute);	
+		if(mute == 1 && disp.silencio != 0)
+			spkr_off();
+
+		if(mute == 0 && disp.silencio == 0)
+			spkr_on();
+			
 			return mute;
 		break;
 
