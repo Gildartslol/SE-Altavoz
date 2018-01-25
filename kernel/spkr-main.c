@@ -13,7 +13,6 @@
 
 #include <linux/limits.h>
 
-//#include "version.h"
 #include "spkr-io.h"
 
 MODULE_AUTHOR("Jorge Amoros , Antonio Perea");
